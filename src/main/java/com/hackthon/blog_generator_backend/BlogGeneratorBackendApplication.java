@@ -10,5 +10,4 @@ public class BlogGeneratorBackendApplication {
 		SpringApplication.run(BlogGeneratorBackendApplication.class, args);
 	}
 
-
 }
