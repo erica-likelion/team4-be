@@ -32,7 +32,7 @@ public class Store {
     private String location;
 
     @Column(name = "store_time")
-    private String storeTime;
+    private Integer storeTime;
 
     @Column(name = "closed_days")
     private String closedDays;
