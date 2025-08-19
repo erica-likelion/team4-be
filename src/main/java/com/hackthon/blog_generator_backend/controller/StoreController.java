@@ -1,67 +1,73 @@
 package com.hackthon.blog_generator_backend.controller;
 
-import com.hackthon.blog_generator_backend.dto.store.StoreRequestDto;
-import com.hackthon.blog_generator_backend.dto.store.StoreResponseDto;
+import com.hackthon.blog_generator_backend.entity.Store;
 import com.hackthon.blog_generator_backend.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/mypage")
+@RequestMapping("/api/dashboard/stores")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // 프론트엔드 연동을 위한 CORS 설정
+@CrossOrigin(origins = "*")
 public class StoreController {
     
     private final StoreService storeService;
     
-    /**
-     * 가게 정보 조회 (편의시설 정보 포함)
-     * @param storeId 가게 ID
-     * @return StoreResponseDto
-     */
-    @GetMapping("/store/{storeId}")
-    public ResponseEntity<StoreResponseDto> getStore(@PathVariable Long storeId) {
+    // 모든 매장 조회 (Dashboard용)
+    @GetMapping
+    public ResponseEntity<List<Store>> getAllStores() {
         try {
-            StoreResponseDto response = storeService.getStore(storeId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            List<Store> stores = storeService.getAllStores();
+            return ResponseEntity.ok(stores);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
     
-    /**
-     * 가게 정보 등록 (편의시설 정보 함께)
-     * @param request 가게 정보 등록 요청
-     * @return StoreResponseDto
-     */
-    @PostMapping("/store")
-    public ResponseEntity<StoreResponseDto> createStore(@RequestBody StoreRequestDto request) {
+    // 특정 매장 조회
+    @GetMapping("/{storeId}")
+    public ResponseEntity<Store> getStoreById(@PathVariable Long storeId) {
         try {
-            StoreResponseDto response = storeService.createStore(request);
-            return ResponseEntity.ok(response);
+            Store store = storeService.getStoreById(storeId);
+            return ResponseEntity.ok(store);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(404).build();
         }
     }
     
-    /**
-     * 가게 정보 수정
-     * @param storeId 가게 ID
-     * @param request 수정할 가게 정보
-     * @return StoreResponseDto
-     */
-    @PutMapping("/store/{storeId}")
-    public ResponseEntity<StoreResponseDto> updateStore(
-            @PathVariable Long storeId,
-            @RequestBody StoreRequestDto request) {
+    // 매장명으로 검색
+    @GetMapping("/search/name")
+    public ResponseEntity<List<Store>> searchStoresByName(@RequestParam String storeName) {
         try {
-            StoreResponseDto response = storeService.updateStore(storeId, request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            List<Store> stores = storeService.searchStoresByName(storeName);
+            return ResponseEntity.ok(stores);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
+    // 위치로 검색
+    @GetMapping("/search/location")
+    public ResponseEntity<List<Store>> searchStoresByLocation(@RequestParam String location) {
+        try {
+            List<Store> stores = storeService.searchStoresByLocation(location);
+            return ResponseEntity.ok(stores);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
+    // 예약 가능한 매장 조회
+    @GetMapping("/reservable")
+    public ResponseEntity<List<Store>> getReservableStores() {
+        try {
+            List<Store> stores = storeService.getReservableStores();
+            return ResponseEntity.ok(stores);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 }
