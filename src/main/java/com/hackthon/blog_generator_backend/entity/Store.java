@@ -48,11 +48,14 @@ public class Store {
 
     // 관계 매핑
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Made> madeList = new ArrayList<>();
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Convenience> convenienceList = new ArrayList<>();
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<PromotionInfo> promotionInfoList = new ArrayList<>();
 }

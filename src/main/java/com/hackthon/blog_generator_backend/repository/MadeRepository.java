@@ -24,6 +24,13 @@ public interface MadeRepository extends JpaRepository<Made, Long> {
     // 결과 제목으로 Made 조회
     Optional<Made> findByResultTitle(String resultTitle);
     
-    // 프롬프트로 Made 조회
-    List<Made> findByPromptContaining(String prompt);
+                    // 프롬프트로 Made 조회
+                List<Made> findByPromptContaining(String prompt);
+
+                // 최근 생성된 Made 조회 (프롬프트 공유용)
+                List<Made> findTop10ByOrderByCreatedAtDesc();
+
+                // 프롬프트 사용 통계 조회
+                @Query("SELECT m.prompt, COUNT(m) as usageCount FROM Made m WHERE m.prompt IS NOT NULL GROUP BY m.prompt ORDER BY usageCount DESC")
+                List<Object[]> findPromptUsageStats();
 }

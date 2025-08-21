@@ -11,16 +11,17 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MadeResponseDto {
-    
+public class PromptDto {
+
     private Long madeId;
-    private String image;
-    private String hashTag;
     private String prompt;
     private String userInput;
     private String resultTitle;
     private String resultContent;
+    private String hashTag;
     private Long storeId;
     private String storeName;
     private LocalDateTime createdAt;
+    private Integer usageCount;
+    private Double popularityScore;
 }

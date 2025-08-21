@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입력 데이터 검증 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin-bottom: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>🔍 입력 데이터 검증 테스트</h1>
+    
+    <!-- 유효한 데이터 테스트 -->
+    <div class="test-section">
+        <h2>✅ 유효한 데이터 테스트</h2>
+        <form id="validForm">
+            <div class="form-group">
+                <label>사용자 입력 (10-1000자):</label>
+                <textarea id="validUserInput" rows="3">맛있는 파스타 맛집을 소개해주세요. 이탈리아 정통 파스타와 피자를 맛볼 수 있는 곳입니다.</textarea>
+            </div>
+            <div class="form-group">
+                <label>매장 ID (양수):</label>
+                <input type="number" id="validStoreId" value="1">
+            </div>
+            <div class="form-group">
+                <label>프롬프트 (500자 이하):</label>
+                <input type="text" id="validPrompt" value="블로그 포스트 생성 요청">
+            </div>
+            <button type="button" onclick="testValidData()">유효한 데이터 테스트</button>
+        </form>
+        <div id="validResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 무효한 데이터 테스트 -->
+    <div class="test-section">
+        <h2>❌ 무효한 데이터 테스트</h2>
+        <form id="invalidForm">
+            <div class="form-group">
+                <label>사용자 입력 (너무 짧음):</label>
+                <textarea id="invalidUserInput" rows="2">짧음</textarea>
+            </div>
+            <div class="form-group">
+                <label>매장 ID (음수):</label>
+                <input type="number" id="invalidStoreId" value="-1">
+            </div>
+            <div class="form-group">
+                <label>프롬프트 (너무 긺):</label>
+                <textarea id="invalidPrompt" rows="3">이것은 매우 긴 프롬프트입니다. 500자를 초과하는 텍스트를 입력하여 검증 오류를 발생시킵니다. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</textarea>
+            </div>
+            <button type="button" onclick="testInvalidData()">무효한 데이터 테스트</button>
+        </form>
+        <div id="invalidResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 빈 데이터 테스트 -->
+    <div class="test-section">
+        <h2>🚫 빈 데이터 테스트</h2>
+        <form id="emptyForm">
+            <div class="form-group">
+                <label>사용자 입력 (빈 값):</label>
+                <textarea id="emptyUserInput" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>매장 ID (null):</label>
+                <input type="text" id="emptyStoreId" value="">
+            </div>
+            <div class="form-group">
+                <label>프롬프트 (빈 값):</label>
+                <input type="text" id="emptyPrompt" value="">
+            </div>
+            <button type="button" onclick="testEmptyData()">빈 데이터 테스트</button>
+        </form>
+        <div id="emptyResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8081';
+
+        async function testValidData() {
+            const resultDiv = document.getElementById('validResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '테스트 중...';
+
+            const requestData = {
+                userInput: document.getElementById('validUserInput').value,
+                storeId: parseInt(document.getElementById('validStoreId').value),
+                prompt: document.getElementById('validPrompt').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/made/user-input`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const responseText = await response.text();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ 검증 성공!</h4>
+                        <p>상태 코드: ${response.status}</p>
+                        <pre>${responseText}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ 요청 실패</h4>
+                        <p>상태 코드: ${response.status}</p>
+                        <pre>${responseText}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ 네트워크 오류</h4>
+                    <p>에러: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testInvalidData() {
+            const resultDiv = document.getElementById('invalidResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '테스트 중...';
+
+            const requestData = {
+                userInput: document.getElementById('invalidUserInput').value,
+                storeId: parseInt(document.getElementById('invalidStoreId').value),
+                prompt: document.getElementById('invalidPrompt').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/made/user-input`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const responseText = await response.text();
+                
+                if (response.status === 400) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ 검증 오류 정상 처리!</h4>
+                        <p>상태 코드: ${response.status} (예상된 검증 오류)</p>
+                        <pre>${responseText}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ 예상과 다른 응답</h4>
+                        <p>상태 코드: ${response.status} (400 Bad Request 예상)</p>
+                        <pre>${responseText}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ 네트워크 오류</h4>
+                    <p>에러: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testEmptyData() {
+            const resultDiv = document.getElementById('emptyResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '테스트 중...';
+
+            const requestData = {
+                userInput: document.getElementById('emptyUserInput').value,
+                storeId: document.getElementById('emptyStoreId').value ? parseInt(document.getElementById('emptyStoreId').value) : null,
+                prompt: document.getElementById('emptyPrompt').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/made/user-input`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const responseText = await response.text();
+                
+                if (response.status === 400) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ 필수값 검증 정상 처리!</h4>
+                        <p>상태 코드: ${response.status} (예상된 검증 오류)</p>
+                        <pre>${responseText}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ 예상과 다른 응답</h4>
+                        <p>상태 코드: ${response.status} (400 Bad Request 예상)</p>
+                        <pre>${responseText}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ 네트워크 오류</h4>
+                    <p>에러: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

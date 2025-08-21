@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프롬프트 복사 기능 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .blog-post {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .blog-title {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .blog-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .copy-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .copy-button:hover {
+            background: #0056b3;
+        }
+        .copy-button:active {
+            background: #004085;
+        }
+        .copy-button.copied {
+            background: #28a745;
+        }
+        .prompt-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .success-message {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-message {
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+        .api-test {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .api-test input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .api-test button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 프롬프트 복사 기능 테스트</h1>
+        <p>이 페이지는 프롬프트 복사 기능을 테스트할 수 있습니다.</p>
+        
+        <!-- 샘플 블로그 글들 -->
+        <div class="blog-post">
+            <div class="blog-title">🍜 맛있는 라멘 맛집 추천</div>
+            <div class="blog-content">
+                오늘은 정말 맛있는 라멘 맛집을 소개해드릴게요! 
+                이곳은 정통 일본 라멘의 맛을 그대로 재현한 곳으로, 
+                특히 돈코츠 라멘이 정말 일품입니다...
+            </div>
+            <button class="copy-button" onclick="copyPrompt(1)">
+                📋 프롬프트 복사하기
+            </button>
+            <div class="prompt-info" id="prompt-1"></div>
+            <div class="success-message" id="success-1">✅ 프롬프트가 클립보드에 복사되었습니다!</div>
+            <div class="error-message" id="error-1">❌ 복사에 실패했습니다.</div>
+        </div>
+        
+        <div class="blog-post">
+            <div class="blog-title">☕ 힐링되는 카페 공간</div>
+            <div class="blog-content">
+                바쁜 일상 속에서 잠시 쉬어갈 수 있는 아늑한 카페를 발견했어요. 
+                이곳은 창가에 앉으면 도시의 아름다운 풍경을 한눈에 볼 수 있고, 
+                커피 향과 함께 편안한 시간을 보낼 수 있습니다...
+            </div>
+            <button class="copy-button" onclick="copyPrompt(2)">
+                📋 프롬프트 복사하기
+            </button>
+            <div class="prompt-info" id="prompt-2"></div>
+            <div class="success-message" id="success-2">✅ 프롬프트가 클립보드에 복사되었습니다!</div>
+            <div class="error-message" id="error-2">❌ 복사에 실패했습니다.</div>
+        </div>
+        
+        <div class="blog-post">
+            <div class="blog-title">🏪 편의점 꿀팁 모음</div>
+            <div class="blog-content">
+                편의점에서 알면 좋은 꿀팁들을 정리해봤어요! 
+                할인 시간대를 활용하는 방법부터, 
+                맛있는 편의점 음식 조합까지...
+            </div>
+            <button class="copy-button" onclick="copyPrompt(3)">
+                📋 프롬프트 복사하기
+            </button>
+            <div class="prompt-info" id="prompt-3"></div>
+            <div class="success-message" id="success-3">✅ 프롬프트가 클립보드에 복사되었습니다!</div>
+            <div class="error-message" id="error-3">❌ 복사에 실패했습니다.</div>
+        </div>
+        
+        <!-- API 테스트 섹션 -->
+        <div class="api-test">
+            <h3>🔧 API 직접 테스트</h3>
+            <p>Made ID를 입력하여 실제 API를 테스트해보세요:</p>
+            <input type="number" id="madeIdInput" placeholder="Made ID 입력 (예: 1)" value="1">
+            <button onclick="testPromptCopyAPI()">프롬프트 복사 API 테스트</button>
+            <button onclick="testPromptStatsAPI()">프롬프트 통계 API 테스트</button>
+            <div id="apiResult" style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px; display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 프롬프트 복사 함수
+        async function copyPrompt(blogId) {
+            const button = event.target;
+            const promptInfo = document.getElementById(`prompt-${blogId}`);
+            const successMsg = document.getElementById(`success-${blogId}`);
+            const errorMsg = document.getElementById(`error-${blogId}`);
+            
+            try {
+                // 1. 백엔드 API에서 프롬프트 정보 가져오기
+                const response = await fetch(`http://localhost:8081/api/made/${blogId}/prompt-copy`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const promptData = await response.json();
+                
+                // 2. 프롬프트 정보 표시
+                promptInfo.style.display = 'block';
+                promptInfo.textContent = `프롬프트: ${promptData.prompt}\n\n사용자 입력: ${promptData.userInput}\n\n매장: ${promptData.storeName}`;
+                
+                // 3. 클립보드에 프롬프트 복사
+                await navigator.clipboard.writeText(promptData.prompt);
+                
+                // 4. 성공 메시지 표시
+                successMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+                button.textContent = '✅ 복사 완료!';
+                button.classList.add('copied');
+                
+                // 5. 복사 완료 로깅 (백엔드에 알림)
+                await fetch(`http://localhost:8081/api/prompts/${blogId}/copy-complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `copiedBy=test-user-${blogId}`
+                });
+                
+                // 3초 후 버튼 원래대로 복원
+                setTimeout(() => {
+                    button.textContent = '📋 프롬프트 복사하기';
+                    button.classList.remove('copied');
+                    successMsg.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('프롬프트 복사 실패:', error);
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+                promptInfo.style.display = 'none';
+                
+                // 에러 메시지도 3초 후 숨김
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 프롬프트 복사 API 테스트
+        async function testPromptCopyAPI() {
+            const madeId = document.getElementById('madeIdInput').value;
+            const resultDiv = document.getElementById('apiResult');
+            
+            try {
+                const response = await fetch(`http://localhost:8081/api/made/${madeId}/prompt-copy`);
+                const data = await response.json();
+                
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>✅ 프롬프트 복사 API 테스트 성공</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>❌ 프롬프트 복사 API 테스트 실패</h4>
+                    <p>에러: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // 프롬프트 통계 API 테스트
+        async function testPromptStatsAPI() {
+            const madeId = document.getElementById('madeIdInput').value;
+            const resultDiv = document.getElementById('apiResult');
+            
+            try {
+                // 먼저 프롬프트 정보를 가져와서 프롬프트 내용을 추출
+                const promptResponse = await fetch(`http://localhost:8081/api/made/${madeId}/prompt-copy`);
+                const promptData = await promptResponse.json();
+                
+                // 프롬프트 통계 API 호출
+                const statsResponse = await fetch(`http://localhost:8081/api/prompts/stats?prompt=${encodeURIComponent(promptData.prompt)}`);
+                const statsData = await statsResponse.json();
+                
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>✅ 프롬프트 통계 API 테스트 성공</h4>
+                    <pre>${JSON.stringify(statsData, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>❌ 프롬프트 통계 API 테스트 실패</h4>
+                    <p>에러: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

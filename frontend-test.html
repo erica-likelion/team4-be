@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 생성기 프론트엔드 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+        .prompt-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .copy-btn {
+            background-color: #28a745;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>☕ 블로그 생성기 프론트엔드 테스트</h1>
+    
+    <!-- 블로그 생성 섹션 -->
+    <div class="container">
+        <div class="section">
+            <h2>📝 블로그 생성</h2>
+            <div class="form-group">
+                <label for="storeSelect">매장 선택:</label>
+                <select id="storeSelect">
+                    <option value="1">스타벅스 강남점</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="userInput">블로그 주제:</label>
+                <textarea id="userInput" rows="3" placeholder="예: 맛있는 커피를 마시고 싶어요"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="prompt">프롬프트 (선택사항):</label>
+                <textarea id="prompt" rows="2" placeholder="예: 커피 관련 블로그 포스트"></textarea>
+            </div>
+            <button onclick="generateBlog()">🚀 블로그 생성</button>
+            <div id="blogResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 프롬프트 공유 섹션 -->
+    <div class="container">
+        <div class="section">
+            <h2>🔄 프롬프트 공유</h2>
+            <button onclick="loadRecentPrompts()">📅 최근 프롬프트</button>
+            <button onclick="loadPopularPrompts()">🔥 인기 프롬프트</button>
+            <button onclick="searchPrompts()">🔍 프롬프트 검색</button>
+            <div id="promptResults"></div>
+        </div>
+    </div>
+
+    <!-- 블로그 목록 섹션 -->
+    <div class="container">
+        <div class="section">
+            <h2>📚 생성된 블로그 목록</h2>
+            <button onclick="loadAllBlogs()">📖 전체 목록 조회</button>
+            <div id="blogList"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+
+        // 블로그 생성
+        async function generateBlog() {
+            const storeId = document.getElementById('storeSelect').value;
+            const userInput = document.getElementById('userInput').value;
+            const prompt = document.getElementById('prompt').value;
+
+            if (!userInput.trim()) {
+                showMessage('블로그 주제를 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/made/user-input`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userInput: userInput,
+                        storeId: parseInt(storeId),
+                        prompt: prompt || null
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showBlogResult(result);
+                    showMessage('블로그가 성공적으로 생성되었습니다!', 'success');
+                    loadAllBlogs(); // 목록 새로고침
+                } else {
+                    const error = await response.json();
+                    showMessage(`에러: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`네트워크 에러: ${error.message}`, 'error');
+            }
+        }
+
+        // 블로그 결과 표시
+        function showBlogResult(result) {
+            const resultDiv = document.getElementById('blogResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <h3>✅ 생성 완료!</h3>
+                <p><strong>제목:</strong> ${result.resultTitle}</p>
+                <p><strong>내용:</strong> ${result.resultContent}</p>
+                <p><strong>해시태그:</strong> ${result.hashTag}</p>
+                <p><strong>생성 시간:</strong> ${new Date(result.createdAt).toLocaleString()}</p>
+            `;
+        }
+
+        // 최근 프롬프트 로드
+        async function loadRecentPrompts() {
+            try {
+                const response = await fetch(`${API_BASE}/api/prompts/recent`);
+                if (response.ok) {
+                    const prompts = await response.json();
+                    displayPrompts(prompts, '최근 생성된 프롬프트');
+                }
+            } catch (error) {
+                showMessage(`에러: ${error.message}`, 'error');
+            }
+        }
+
+        // 인기 프롬프트 로드
+        async function loadPopularPrompts() {
+            try {
+                const response = await fetch(`${API_BASE}/api/prompts/popular`);
+                if (response.ok) {
+                    const prompts = await response.json();
+                    displayPrompts(prompts, '인기 프롬프트');
+                }
+            } catch (error) {
+                showMessage(`에러: ${error.message}`, 'error');
+            }
+        }
+
+        // 프롬프트 검색
+        async function searchPrompts() {
+            const keyword = prompt('검색할 키워드를 입력하세요:');
+            if (!keyword) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/prompts/search?keyword=${encodeURIComponent(keyword)}`);
+                if (response.ok) {
+                    const prompts = await response.json();
+                    displayPrompts(prompts, `"${keyword}" 검색 결과`);
+                }
+            } catch (error) {
+                showMessage(`에러: ${error.message}`, 'error');
+            }
+        }
+
+        // 프롬프트 표시
+        function displayPrompts(prompts, title) {
+            const resultsDiv = document.getElementById('promptResults');
+            if (prompts.length === 0) {
+                resultsDiv.innerHTML = '<p>프롬프트가 없습니다.</p>';
+                return;
+            }
+
+            let html = `<h3>${title}</h3>`;
+            prompts.forEach(prompt => {
+                html += `
+                    <div class="prompt-item">
+                        <p><strong>프롬프트:</strong> ${prompt.prompt}</p>
+                        <p><strong>사용자 입력:</strong> ${prompt.userInput}</p>
+                        <p><strong>결과 제목:</strong> ${prompt.resultTitle}</p>
+                        <button class="copy-btn" onclick="copyPrompt('${prompt.prompt}')">📋 복사</button>
+                        <button class="copy-btn" onclick="reusePrompt(${prompt.madeId})">🔄 재사용</button>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+        }
+
+        // 프롬프트 복사
+        function copyPrompt(prompt) {
+            navigator.clipboard.writeText(prompt).then(() => {
+                showMessage('프롬프트가 클립보드에 복사되었습니다!', 'success');
+            });
+        }
+
+        // 프롬프트 재사용
+        async function reusePrompt(madeId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/prompts/reuse/${madeId}`);
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('prompt').value = result.prompt;
+                    document.getElementById('userInput').value = result.userInput;
+                    showMessage('프롬프트가 재사용 폼에 로드되었습니다!', 'success');
+                }
+            } catch (error) {
+                showMessage(`에러: ${error.message}`, 'error');
+            }
+        }
+
+        // 전체 블로그 목록 로드
+        async function loadAllBlogs() {
+            try {
+                const response = await fetch(`${API_BASE}/api/made`);
+                if (response.ok) {
+                    const blogs = await response.json();
+                    displayBlogs(blogs);
+                }
+            } catch (error) {
+                showMessage(`에러: ${error.message}`, 'error');
+            }
+        }
+
+        // 블로그 목록 표시
+        function displayBlogs(blogs) {
+            const listDiv = document.getElementById('blogList');
+            if (blogs.length === 0) {
+                listDiv.innerHTML = '<p>생성된 블로그가 없습니다.</p>';
+                return;
+            }
+
+            let html = '<h3>📚 생성된 블로그 목록</h3>';
+            blogs.forEach(blog => {
+                html += `
+                    <div class="prompt-item">
+                        <p><strong>제목:</strong> ${blog.resultTitle}</p>
+                        <p><strong>내용:</strong> ${blog.resultContent}</p>
+                        <p><strong>생성 시간:</strong> ${new Date(blog.createdAt).toLocaleString()}</p>
+                        <button class="copy-btn" onclick="copyPrompt('${blog.prompt || ''}')">📋 프롬프트 복사</button>
+                    </div>
+                `;
+            });
+            listDiv.innerHTML = html;
+        }
+
+        // 메시지 표시
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            document.body.insertBefore(messageDiv, document.body.firstChild);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // 페이지 로드 시 초기 데이터 로드
+        window.onload = function() {
+            loadAllBlogs();
+        };
+    </script>
+</body>
+</html>
