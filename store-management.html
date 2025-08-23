@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가게 관리 시스템</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .store-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .store-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .store-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .store-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .store-actions {
+            margin-top: 10px;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #333; margin-bottom: 30px;">🏪 가게 관리 시스템</h1>
+    
+    <div class="container">
+        <!-- 왼쪽: 가게 등록/수정 -->
+        <div class="section">
+            <h2>📝 가게 정보 등록/수정</h2>
+            
+            <form id="storeForm">
+                <div class="form-group">
+                    <label for="storeName">가게명 *</label>
+                    <input type="text" id="storeName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">위치 *</label>
+                    <input type="text" id="location" placeholder="예: 서울 강남구 강남대로 123" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="storeTime">영업시간</label>
+                    <input type="text" id="storeTime" placeholder="예: 07:00-23:00">
+                </div>
+                
+                <div class="form-group">
+                    <label for="information">가게 정보</label>
+                    <textarea id="information" placeholder="가게에 대한 상세한 설명을 입력하세요..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menu">메뉴</label>
+                    <textarea id="menu" placeholder="주요 메뉴나 서비스를 입력하세요..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reservation">예약 가능 여부</label>
+                    <select id="reservation">
+                        <option value="false">불가능</option>
+                        <option value="true">가능</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="closedDays">휴무일</label>
+                    <input type="text" id="closedDays" placeholder="예: 매주 월요일">
+                </div>
+                
+                <div class="form-group">
+                    <label for="storeImage">가게 이미지 URL</label>
+                    <input type="text" id="storeImage" placeholder="이미지 URL을 입력하세요">
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">🚀 가게 등록</button>
+                    <button type="button" class="btn btn-warning" onclick="updateStore()">✏️ 가게 수정</button>
+                    <button type="button" class="btn" onclick="clearForm()">🔄 폼 초기화</button>
+                </div>
+            </form>
+            
+            <div id="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 오른쪽: 가게 목록 및 관리 -->
+        <div class="section">
+            <h2>📋 가게 목록</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <button class="btn" onclick="loadStores()">🔄 목록 새로고침</button>
+                <button class="btn btn-warning" onclick="loadStores()">🔍 검색</button>
+            </div>
+            
+            <div id="storeList" class="store-list">
+                <p>가게 목록을 불러오려면 "목록 새로고침" 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentStoreId = null;
+        
+        // 페이지 로드 시 가게 목록 가져오기
+        window.onload = function() {
+            loadStores();
+        };
+        
+        // 가게 목록 로드
+        async function loadStores() {
+            try {
+                const response = await fetch('http://localhost:8081/api/dashboard/stores');
+                const stores = await response.json();
+                displayStores(stores);
+            } catch (error) {
+                showResult('가게 목록 로드 실패: ' + error.message, 'error');
+            }
+        }
+        
+        // 가게 목록 표시
+        function displayStores(stores) {
+            const storeList = document.getElementById('storeList');
+            
+            if (stores.length === 0) {
+                storeList.innerHTML = '<p>등록된 가게가 없습니다.</p>';
+                return;
+            }
+            
+            storeList.innerHTML = stores.map(store => `
+                <div class="store-item">
+                    <h4>${store.storeName}</h4>
+                    <p><strong>위치:</strong> ${store.location || '정보 없음'}</p>
+                    <p><strong>영업시간:</strong> ${store.storeTime || '정보 없음'}</p>
+                    <p><strong>메뉴:</strong> ${store.menu || '정보 없음'}</p>
+                    <p><strong>예약:</strong> ${store.reservation ? '가능' : '불가능'}</p>
+                    <div class="store-actions">
+                        <button class="btn btn-warning" onclick="editStore(${store.storeId})">✏️ 수정</button>
+                        <button class="btn btn-danger" onclick="deleteStore(${store.storeId})">🗑️ 삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 가게 등록
+        document.getElementById('storeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const storeData = {
+                storeName: document.getElementById('storeName').value,
+                location: document.getElementById('location').value,
+                storeTime: document.getElementById('storeTime').value,
+                information: document.getElementById('information').value,
+                menu: document.getElementById('menu').value,
+                reservation: document.getElementById('reservation').value === 'true',
+                closedDays: document.getElementById('closedDays').value,
+                storeImage: document.getElementById('storeImage').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8081/api/dashboard/stores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(storeData)
+                });
+                
+                if (response.ok) {
+                    const createdStore = await response.json();
+                    showResult('가게가 성공적으로 등록되었습니다!', 'success');
+                    clearForm();
+                    loadStores();
+                } else {
+                    throw new Error('가게 등록 실패');
+                }
+            } catch (error) {
+                showResult('가게 등록 중 오류가 발생했습니다: ' + error.message, 'error');
+            }
+        });
+        
+        // 가게 수정
+        async function updateStore() {
+            if (!currentStoreId) {
+                showResult('수정할 가게를 먼저 선택해주세요.', 'error');
+                return;
+            }
+            
+            const storeData = {
+                storeId: currentStoreId,
+                storeName: document.getElementById('storeName').value,
+                location: document.getElementById('location').value,
+                storeTime: document.getElementById('storeTime').value,
+                information: document.getElementById('information').value,
+                menu: document.getElementById('menu').value,
+                reservation: document.getElementById('reservation').value === 'true',
+                closedDays: document.getElementById('closedDays').value,
+                storeImage: document.getElementById('storeImage').value
+            };
+            
+            try {
+                const response = await fetch(`http://localhost:8081/api/dashboard/stores/${currentStoreId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(storeData)
+                });
+                
+                if (response.ok) {
+                    const updatedStore = await response.json();
+                    showResult('가게 정보가 성공적으로 수정되었습니다!', 'success');
+                    clearForm();
+                    loadStores();
+                    currentStoreId = null;
+                } else {
+                    throw new Error('가게 수정 실패');
+                }
+            } catch (error) {
+                showResult('가게 수정 중 오류가 발생했습니다: ' + error.message, 'error');
+            }
+        }
+        
+        // 가게 삭제
+        async function deleteStore(storeId) {
+            if (!confirm('정말로 이 가게를 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:8081/api/dashboard/stores/${storeId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showResult('가게가 성공적으로 삭제되었습니다!', 'success');
+                    loadStores();
+                } else {
+                    throw new Error('가게 삭제 실패');
+                }
+            } catch (error) {
+                showResult('가게 삭제 중 오류가 발생했습니다: ' + error.message, 'error');
+            }
+        }
+        
+        // 가게 수정 모드로 전환
+        function editStore(storeId) {
+            // 가게 정보를 폼에 로드
+            fetch(`http://localhost:8081/api/dashboard/stores/${storeId}`)
+                .then(response => response.json())
+                .then(store => {
+                    document.getElementById('storeName').value = store.storeName || '';
+                    document.getElementById('location').value = store.location || '';
+                    document.getElementById('storeTime').value = store.storeTime || '';
+                    document.getElementById('information').value = store.information || '';
+                    document.getElementById('menu').value = store.menu || '';
+                    document.getElementById('reservation').value = store.reservation ? 'true' : 'false';
+                    document.getElementById('closedDays').value = store.closedDays || '';
+                    document.getElementById('storeImage').value = store.storeImage || '';
+                    
+                    currentStoreId = storeId;
+                    showResult('가게 수정 모드입니다. 정보를 수정하고 "가게 수정" 버튼을 클릭하세요.', 'success');
+                })
+                .catch(error => {
+                    showResult('가게 정보 로드 실패: ' + error.message, 'error');
+                });
+        }
+        
+        // 폼 초기화
+        function clearForm() {
+            document.getElementById('storeForm').reset();
+            currentStoreId = null;
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        // 결과 표시
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+

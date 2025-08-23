@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Generator Enhanced Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .file-upload {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .file-upload:hover {
+            border-color: #007bff;
+        }
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        .hashtag-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .hashtag {
+            background: #e9ecef;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hashtag .remove {
+            cursor: pointer;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .image-item .remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #333; margin-bottom: 30px;">🚀 Blog Generator Enhanced Test</h1>
+    
+    <div class="container">
+        <!-- 왼쪽: 입력 폼 -->
+        <div class="section">
+            <h2>📝 블로그 생성 입력</h2>
+            
+            <form id="blogForm">
+                <div class="form-group">
+                    <label for="storeId">가게 선택:</label>
+                    <select id="storeId" required>
+                        <option value="">가게를 선택하세요</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userInput">사용자 입력:</label>
+                    <textarea id="userInput" placeholder="블로그에 포함하고 싶은 내용을 입력하세요..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="hashTags">해시태그:</label>
+                    <input type="text" id="hashTags" placeholder="해시태그를 입력하세요 (쉼표로 구분)">
+                    <div class="hashtag-input" id="hashtagDisplay"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="detailedRequest">상세 요청:</label>
+                    <textarea id="detailedRequest" placeholder="원하는 문체나 강조할 표현이 있다면 알려주세요..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>사진 업로드:</label>
+                    <div class="file-upload" onclick="document.getElementById('imageFiles').click()">
+                        <input type="file" id="imageFiles" multiple accept="image/*">
+                        <p>📷 이미지를 클릭하여 업로드하세요 (최대 9개)</p>
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">🚀 블로그 생성하기</button>
+            </form>
+        </div>
+        
+        <!-- 오른쪽: 결과 및 수정 -->
+        <div class="section">
+            <h2>✨ 생성된 블로그</h2>
+            
+            <div id="result" style="display: none;">
+                <div class="result">
+                    <h3 id="generatedTitle"></h3>
+                    <div id="generatedContent"></div>
+                    <div id="generatedHashtags"></div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="copyToClipboard()">📋 복사하기</button>
+                        <button class="btn btn-warning" onclick="showModificationForm()">✏️ 수정 요청</button>
+                    </div>
+                </div>
+                
+                <div id="modificationForm" style="display: none; margin-top: 20px;">
+                    <h4>📝 수정 요청</h4>
+                    <textarea id="modificationRequest" placeholder="수정하고 싶은 부분이 있다면 자유롭게 적어주세요..." rows="4"></textarea>
+                    <button class="btn btn-warning" onclick="modifyContent()" style="margin-top: 10px;">🔄 내용 수정</button>
+                </div>
+            </div>
+            
+            <div id="loading" style="display: none; text-align: center; padding: 40px;">
+                <p>🤖 AI가 블로그를 생성하고 있습니다...</p>
+            </div>
+            
+            <div id="error" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentMadeId = null;
+        let selectedImages = [];
+        
+        // 페이지 로드 시 가게 목록 가져오기
+        window.onload = function() {
+            loadStores();
+            setupHashtagInput();
+            setupImageUpload();
+        };
+        
+        // 가게 목록 로드
+        async function loadStores() {
+            try {
+                const response = await fetch('http://localhost:8081/api/dashboard/stores');
+                const stores = await response.json();
+                
+                const select = document.getElementById('storeId');
+                stores.forEach(store => {
+                    const option = document.createElement('option');
+                    option.value = store.storeId;
+                    option.textContent = store.storeName;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('가게 목록 로드 실패:', error);
+            }
+        }
+        
+        // 해시태그 입력 처리
+        function setupHashtagInput() {
+            const input = document.getElementById('hashTags');
+            const display = document.getElementById('hashtagDisplay');
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const value = this.value.trim();
+                    if (value) {
+                        addHashtag(value);
+                        this.value = '';
+                    }
+                }
+            });
+        }
+        
+        function addHashtag(tag) {
+            const display = document.getElementById('hashtagDisplay');
+            const hashtagDiv = document.createElement('div');
+            hashtagDiv.className = 'hashtag';
+            hashtagDiv.innerHTML = `
+                #${tag}
+                <span class="remove" onclick="this.parentElement.remove()">×</span>
+            `;
+            display.appendChild(hashtagDiv);
+        }
+        
+        // 이미지 업로드 처리
+        function setupImageUpload() {
+            const input = document.getElementById('imageFiles');
+            input.addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                selectedImages = files;
+                displayImagePreview(files);
+            });
+        }
+        
+        function displayImagePreview(files) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'image-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <span class="remove" onclick="removeImage(${index})">×</span>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function removeImage(index) {
+            selectedImages.splice(index, 1);
+            displayImagePreview(selectedImages);
+        }
+        
+        // 폼 제출 처리
+        document.getElementById('blogForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('storeId', document.getElementById('storeId').value);
+            formData.append('userInput', document.getElementById('userInput').value);
+            formData.append('hashTags', getHashtagsText());
+            formData.append('detailedRequest', document.getElementById('detailedRequest').value);
+            
+            selectedImages.forEach(image => {
+                formData.append('images', image);
+            });
+            
+            await createBlogWithImages(formData);
+        });
+        
+        function getHashtagsText() {
+            const hashtags = Array.from(document.querySelectorAll('.hashtag'))
+                .map(tag => tag.textContent.replace('×', '').trim());
+            return hashtags.join(', ');
+        }
+        
+        // 이미지 포함 블로그 생성
+        async function createBlogWithImages(formData) {
+            try {
+                showLoading();
+                
+                const response = await fetch('http://localhost:8081/api/made/upload-images', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    currentMadeId = result.madeId;
+                    displayResult(result);
+                } else {
+                    throw new Error('블로그 생성 실패');
+                }
+            } catch (error) {
+                showError('블로그 생성 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // 결과 표시
+        function displayResult(result) {
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            
+            document.getElementById('generatedTitle').textContent = result.resultTitle;
+            document.getElementById('generatedContent').innerHTML = result.resultContent.replace(/\n/g, '<br>');
+            
+            // 해시태그 표시
+            const hashtags = result.hashTag;
+            if (hashtags) {
+                try {
+                    const parsed = JSON.parse(hashtags);
+                    if (Array.isArray(parsed)) {
+                        document.getElementById('generatedHashtags').innerHTML = 
+                            '<strong>해시태그:</strong> ' + parsed.map(tag => `#${tag}`).join(' ');
+                    }
+                } catch (e) {
+                    document.getElementById('generatedHashtags').innerHTML = 
+                        '<strong>해시태그:</strong> ' + hashtags;
+                }
+            }
+        }
+        
+        // 복사 기능
+        function copyToClipboard() {
+            const title = document.getElementById('generatedTitle').textContent;
+            const content = document.getElementById('generatedContent').textContent;
+            const hashtags = document.getElementById('generatedHashtags').textContent;
+            
+            const textToCopy = `${title}\n\n${content}\n\n${hashtags}`;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('📋 복사가 완료되었습니다!');
+            }).catch(() => {
+                // fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('📋 복사가 완료되었습니다!');
+            });
+        }
+        
+        // 수정 폼 표시
+        function showModificationForm() {
+            document.getElementById('modificationForm').style.display = 'block';
+        }
+        
+        // 내용 수정
+        async function modifyContent() {
+            const modificationRequest = document.getElementById('modificationRequest').value;
+            if (!modificationRequest.trim()) {
+                alert('수정 요청 내용을 입력해주세요.');
+                return;
+            }
+            
+            try {
+                showLoading();
+                
+                const formData = new FormData();
+                formData.append('madeId', currentMadeId);
+                formData.append('modificationRequest', modificationRequest);
+                
+                const response = await fetch('http://localhost:8081/api/made/modify-content', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    displayResult(result);
+                    document.getElementById('modificationForm').style.display = 'none';
+                    document.getElementById('modificationRequest').value = '';
+                    alert('✅ 블로그 내용이 수정되었습니다!');
+                } else {
+                    throw new Error('내용 수정 실패');
+                }
+            } catch (error) {
+                showError('내용 수정 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // 로딩 표시
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 에러 표시
+        function showError(message) {
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').innerHTML = `<div class="result error">${message}</div>`;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+

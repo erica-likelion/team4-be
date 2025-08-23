@@ -1,5 +1,6 @@
 package com.hackthon.blog_generator_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,16 +47,19 @@ public class Store {
     @Column(name = "count")
     private Integer count;
 
-    // 관계 매핑
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    // 관계 매핑 - 무한 순환 참조 방지
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @Builder.Default
     private List<Made> madeList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @Builder.Default
     private List<Convenience> convenienceList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @Builder.Default
     private List<PromotionInfo> promotionInfoList = new ArrayList<>();
 }

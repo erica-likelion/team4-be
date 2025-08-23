@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI API 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .health-check {
+            background-color: #e2e3e5;
+            border: 1px solid #d6d8db;
+            color: #383d41;
+            margin-bottom: 20px;
+        }
+        .api-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-ok {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-error {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 OpenAI API 연동 테스트</h1>
+        
+        <!-- API 상태 확인 -->
+        <div class="health-check">
+            <h3>API 상태 확인</h3>
+            <button onclick="checkHealth()">상태 확인</button>
+            <span id="apiStatus" class="api-status">확인 필요</span>
+        </div>
+
+        <!-- 블로그 콘텐츠 생성 테스트 -->
+        <h3>📝 블로그 콘텐츠 생성 테스트</h3>
+        <div class="form-group">
+            <label for="userInput">사용자 입력:</label>
+            <input type="text" id="userInput" placeholder="예: 맛있는 커피와 디저트를 즐길 수 있는 카페" value="맛있는 커피와 디저트를 즐길 수 있는 카페">
+        </div>
+        <div class="form-group">
+            <label for="storeInfo">매장 정보:</label>
+            <textarea id="storeInfo" placeholder="예: 서울 강남구에 위치한 분위기 좋은 카페, 아늑한 분위기와 특별한 커피 맛">서울 강남구에 위치한 분위기 좋은 카페, 아늑한 분위기와 특별한 커피 맛</textarea>
+        </div>
+        <button onclick="generateContent()">콘텐츠 생성</button>
+        <div id="contentResult" class="result" style="display: none;"></div>
+
+        <!-- 블로그 제목 생성 테스트 -->
+        <h3>📌 블로그 제목 생성 테스트</h3>
+        <div class="form-group">
+            <label for="titleUserInput">사용자 입력:</label>
+            <input type="text" id="titleUserInput" placeholder="예: 맛있는 커피와 디저트를 즐길 수 있는 카페" value="맛있는 커피와 디저트를 즐길 수 있는 카페">
+        </div>
+        <button onclick="generateTitle()">제목 생성</button>
+        <div id="titleResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8081';
+
+        // API 상태 확인
+        async function checkHealth() {
+            const statusElement = document.getElementById('apiStatus');
+            statusElement.textContent = '확인 중...';
+            statusElement.className = 'api-status status-ok';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/openai/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    statusElement.textContent = '정상';
+                    statusElement.className = 'api-status status-ok';
+                    console.log('API 상태 확인 성공:', data);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusElement.textContent = '오류';
+                statusElement.className = 'api-status status-error';
+                console.error('API 상태 확인 실패:', error);
+            }
+        }
+
+        // 블로그 콘텐츠 생성
+        async function generateContent() {
+            const userInput = document.getElementById('userInput').value;
+            const storeInfo = document.getElementById('storeInfo').value;
+            const resultElement = document.getElementById('contentResult');
+
+            if (!userInput.trim()) {
+                alert('사용자 입력을 입력해주세요.');
+                return;
+            }
+
+            resultElement.style.display = 'block';
+            resultElement.className = 'result loading';
+            resultElement.textContent = 'AI가 블로그 콘텐츠를 생성하고 있습니다...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/openai/generate-content`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userInput: userInput,
+                        storeInfo: storeInfo
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultElement.className = 'result success';
+                    resultElement.textContent = `✅ 생성 성공!\n\n📝 사용자 입력: ${data.userInput}\n🏪 매장 정보: ${data.storeInfo}\n\n🤖 AI 생성 결과:\n${data.generatedContent}\n\n⏰ 생성 시간: ${new Date(data.timestamp).toLocaleString()}`;
+                } else {
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `❌ 생성 실패!\n\n오류: ${data.error}\n\n⏰ 시간: ${new Date(data.timestamp).toLocaleString()}`;
+                }
+            } catch (error) {
+                resultElement.className = 'result error';
+                resultElement.textContent = `❌ 요청 실패!\n\n오류: ${error.message}\n\n⏰ 시간: ${new Date().toLocaleString()}`;
+                console.error('콘텐츠 생성 요청 실패:', error);
+            }
+        }
+
+        // 블로그 제목 생성
+        async function generateTitle() {
+            const userInput = document.getElementById('titleUserInput').value;
+            const resultElement = document.getElementById('titleResult');
+
+            if (!userInput.trim()) {
+                alert('사용자 입력을 입력해주세요.');
+                return;
+            }
+
+            resultElement.style.display = 'block';
+            resultElement.className = 'result loading';
+            resultElement.textContent = 'AI가 블로그 제목을 생성하고 있습니다...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/openai/generate-title`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userInput: userInput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultElement.className = 'result success';
+                    resultElement.textContent = `✅ 제목 생성 성공!\n\n📝 사용자 입력: ${data.userInput}\n\n🤖 AI 생성 제목:\n${data.generatedTitle}\n\n⏰ 생성 시간: ${new Date(data.timestamp).toLocaleString()}`;
+                } else {
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `❌ 제목 생성 실패!\n\n오류: ${data.error}\n\n⏰ 시간: ${new Date(data.timestamp).toLocaleString()}`;
+                }
+            } catch (error) {
+                resultElement.className = 'result error';
+                resultElement.textContent = `❌ 요청 실패!\n\n오류: ${error.message}\n\n⏰ 시간: ${new Date().toLocaleString()}`;
+                console.error('제목 생성 요청 실패:', error);
+            }
+        }
+
+        // 페이지 로드 시 API 상태 확인
+        window.onload = function() {
+            checkHealth();
+        };
+    </script>
+</body>
+</html>
+
+
+
+
+

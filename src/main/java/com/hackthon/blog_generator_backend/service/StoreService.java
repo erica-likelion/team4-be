@@ -46,4 +46,28 @@ public class StoreService {
     public List<Store> searchStoresByInformation(String information) {
         return storeRepository.findByInformationContaining(information);
     }
+    
+    // 가게 등록
+    @Transactional
+    public Store createStore(Store store) {
+        return storeRepository.save(store);
+    }
+    
+    // 가게 정보 수정
+    @Transactional
+    public Store updateStore(Store store) {
+        if (!storeRepository.existsById(store.getStoreId())) {
+            throw new RuntimeException("Store not found with id: " + store.getStoreId());
+        }
+        return storeRepository.save(store);
+    }
+    
+    // 가게 삭제
+    @Transactional
+    public void deleteStore(Long storeId) {
+        if (!storeRepository.existsById(storeId)) {
+            throw new RuntimeException("Store not found with id: " + storeId);
+        }
+        storeRepository.deleteById(storeId);
+    }
 }

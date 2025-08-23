@@ -70,4 +70,27 @@ public class StoreController {
             return ResponseEntity.status(500).build();
         }
     }
+    
+    // 가게 등록 (POST)
+    @PostMapping
+    public ResponseEntity<Store> createStore(@RequestBody Store store) {
+        try {
+            Store createdStore = storeService.createStore(store);
+            return ResponseEntity.status(201).body(createdStore);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
+    // 가게 정보 수정 (PUT)
+    @PutMapping("/{storeId}")
+    public ResponseEntity<Store> updateStore(@PathVariable Long storeId, @RequestBody Store store) {
+        try {
+            store.setStoreId(storeId);
+            Store updatedStore = storeService.updateStore(store);
+            return ResponseEntity.ok(updatedStore);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
