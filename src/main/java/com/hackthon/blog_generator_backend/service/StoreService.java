@@ -82,31 +82,27 @@ public class StoreService {
         Store savedStore = storeRepository.save(store);
         System.out.println("Store 저장 완료 - ID: " + savedStore.getStoreId());
         
-        // Convenience 엔티티 생성 및 저장
-        if (requestDto.getWifi() != null || requestDto.getOutlet() != null || 
-            requestDto.getPet() != null || requestDto.getPackagingDelivery() != null) {
-            
-            System.out.println("편의시설 정보 저장 시작");
-            System.out.println("wifi: " + requestDto.getWifi());
-            System.out.println("outlet: " + requestDto.getOutlet());
-            System.out.println("pet: " + requestDto.getPet());
-            System.out.println("packagingDelivery: " + requestDto.getPackagingDelivery());
-            
-            Convenience convenience = Convenience.builder()
-                    .wifi(requestDto.getWifi())
-                    .outlet(requestDto.getOutlet())
-                    .pet(requestDto.getPet())
-                    .packagingDelivery(requestDto.getPackagingDelivery())
-                    .store(savedStore)
-                    .build();
-            
-            Convenience savedConvenience = convenienceRepository.save(convenience);
-            System.out.println("편의시설 정보 저장 완료 - ID: " + savedConvenience.getId());
-        } else {
-            System.out.println("편의시설 정보가 null이므로 저장하지 않음");
-        }
+        // Convenience 엔티티 생성 및 저장 (null 값은 false로 기본 처리)
+        System.out.println("편의시설 정보 저장 시작");
+        System.out.println("wifi: " + requestDto.getWifi() + " -> " + (requestDto.getWifi() != null ? requestDto.getWifi() : false));
+        System.out.println("outlet: " + requestDto.getOutlet() + " -> " + (requestDto.getOutlet() != null ? requestDto.getOutlet() : false));
+        System.out.println("pet: " + requestDto.getPet() + " -> " + (requestDto.getPet() != null ? requestDto.getPet() : false));
+        System.out.println("packagingDelivery: " + requestDto.getPackagingDelivery() + " -> " + (requestDto.getPackagingDelivery() != null ? requestDto.getPackagingDelivery() : false));
         
-        return savedStore;
+        Convenience convenience = Convenience.builder()
+                .wifi(requestDto.getWifi() != null ? requestDto.getWifi() : false)
+                .outlet(requestDto.getOutlet() != null ? requestDto.getOutlet() : false)
+                .pet(requestDto.getPet() != null ? requestDto.getPet() : false)
+                .packagingDelivery(requestDto.getPackagingDelivery() != null ? requestDto.getPackagingDelivery() : false)
+                .store(savedStore)
+                .build();
+        
+        Convenience savedConvenience = convenienceRepository.save(convenience);
+        System.out.println("편의시설 정보 저장 완료 - ID: " + savedConvenience.getId());
+        
+        // 편의시설 정보를 포함하여 Store 재조회
+        return storeRepository.findByIdWithConvenience(savedStore.getStoreId())
+                .orElse(savedStore);
     }
     
     // 가게 정보 수정
