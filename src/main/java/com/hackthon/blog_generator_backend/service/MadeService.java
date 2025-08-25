@@ -282,32 +282,52 @@ public class MadeService {
                 .build();
     }
     
-    // 간단한 JSON 파싱 메서드들
+    // 개선된 JSON 파싱 메서드들
     private String extractTitleFromResponse(String response) {
         try {
-            // JSON 응답에서 title 필드 추출
+            log.debug("AI 응답 원본: {}", response);
+            
+            // 1. Jackson을 사용한 JSON 파싱 (우선 시도)
+            if (response.contains("{") && response.contains("}")) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode jsonNode = mapper.readTree(response);
+                    if (jsonNode.has("title")) {
+                        String title = jsonNode.get("title").asText();
+                        log.debug("Jackson으로 추출된 제목: {}", title);
+                        return title;
+                    }
+                } catch (Exception e) {
+                    log.warn("Jackson JSON 파싱 실패: {}", e.getMessage());
+                }
+            }
+            
+            // 2. 정규식을 사용한 JSON 파싱 (대안)
+            if (response.contains("\"title\":")) {
+                // "title": "제목" 패턴 찾기
+                String pattern = "\"title\":\\s*\"([^\"]+)\"";
+                java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern);
+                java.util.regex.Matcher matcher = regex.matcher(response);
+                
+                if (matcher.find()) {
+                    String title = matcher.group(1);
+                    log.debug("정규식으로 추출된 제목: {}", title);
+                    return title;
+                }
+            }
+            
+            // 3. 간단한 문자열 파싱 (최후 수단)
             if (response.contains("\"title\":")) {
                 int start = response.indexOf("\"title\":") + 9;
                 int end = response.indexOf("\"", start);
                 if (end > start) {
-                    return response.substring(start, end).trim();
+                    String title = response.substring(start, end).trim();
+                    log.debug("문자열 파싱으로 추출된 제목: {}", title);
+                    return title;
                 }
             }
             
-            // 대안: JSON 파싱 시도
-            if (response.startsWith("{")) {
-                try {
-                    // Jackson을 사용한 JSON 파싱
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode jsonNode = mapper.readTree(response);
-                    if (jsonNode.has("title")) {
-                        return jsonNode.get("title").asText();
-                    }
-                } catch (Exception e) {
-                    log.warn("Jackson JSON 파싱 실패, 정규식으로 추출 시도: {}", e.getMessage());
-                }
-            }
-            
+            log.warn("제목을 추출할 수 없음. 응답: {}", response);
             return "제목을 찾을 수 없습니다";
         } catch (Exception e) {
             log.error("제목 추출 중 오류: {}", e.getMessage());
@@ -317,28 +337,53 @@ public class MadeService {
     
     private String extractContentFromResponse(String response) {
         try {
-            // JSON 응답에서 content 필드 추출
-            if (response.contains("\"content\":")) {
-                int start = response.indexOf("\"content\":") + 11;
-                int end = response.indexOf("\"", start);
-                if (end > start) {
-                    return response.substring(start, end).trim();
-                }
-            }
+            log.debug("AI 응답 원본: {}", response);
             
-            // 대안: JSON 파싱 시도
-            if (response.startsWith("{")) {
+            // 1. Jackson을 사용한 JSON 파싱 (우선 시도)
+            if (response.contains("{") && response.contains("}")) {
                 try {
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode jsonNode = mapper.readTree(response);
                     if (jsonNode.has("content")) {
-                        return jsonNode.get("content").asText();
+                        String content = jsonNode.get("content").asText();
+                        log.debug("Jackson으로 추출된 내용 길이: {}", content.length());
+                        return content;
                     }
                 } catch (Exception e) {
-                    log.warn("Jackson JSON 파싱 실패, 정규식으로 추출 시도: {}", e.getMessage());
+                    log.warn("Jackson JSON 파싱 실패: {}", e.getMessage());
                 }
             }
             
+            // 2. 정규식을 사용한 JSON 파싱 (대안)
+            if (response.contains("\"content\":")) {
+                // "content": "내용" 패턴 찾기 (여러 줄 포함)
+                String pattern = "\"content\":\\s*\"([^\"]*(?:\\.[^\"]*)*)\"";
+                java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.DOTALL);
+                java.util.regex.Matcher matcher = regex.matcher(response);
+                
+                if (matcher.find()) {
+                    String content = matcher.group(1);
+                    log.debug("정규식으로 추출된 내용 길이: {}", content.length());
+                    return content;
+                }
+            }
+            
+            // 3. 간단한 문자열 파싱 (최후 수단)
+            if (response.contains("\"content\":")) {
+                int start = response.indexOf("\"content\":") + 11;
+                // 다음 필드나 JSON 끝까지 찾기
+                int end = response.indexOf("\",", start);
+                if (end == -1) {
+                    end = response.indexOf("\"}", start);
+                }
+                if (end > start) {
+                    String content = response.substring(start, end).trim();
+                    log.debug("문자열 파싱으로 추출된 내용 길이: {}", content.length());
+                    return content;
+                }
+            }
+            
+            log.warn("내용을 추출할 수 없음. 응답: {}", response);
             return "내용을 찾을 수 없습니다";
         } catch (Exception e) {
             log.error("내용 추출 중 오류: {}", e.getMessage());
@@ -348,31 +393,52 @@ public class MadeService {
     
     private String extractHashtagsFromResponse(String response) {
         try {
-            // JSON 응답에서 hashtags 필드 추출
-            if (response.contains("\"hashtags\":")) {
-                int start = response.indexOf("\"hashtags\":");
-                int end = response.indexOf("]", start);
-                if (end > start) {
-                    return response.substring(start, end + 1);
-                }
-            }
+            log.debug("AI 응답 원본: {}", response);
             
-            // 대안: JSON 파싱 시도
-            if (response.startsWith("{")) {
+            // 1. Jackson을 사용한 JSON 파싱 (우선 시도)
+            if (response.contains("{") && response.contains("}")) {
                 try {
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode jsonNode = mapper.readTree(response);
                     if (jsonNode.has("hashtags")) {
                         JsonNode hashtagsNode = jsonNode.get("hashtags");
                         if (hashtagsNode.isArray()) {
-                            return hashtagsNode.toString();
+                            String hashtags = hashtagsNode.toString();
+                            log.debug("Jackson으로 추출된 해시태그: {}", hashtags);
+                            return hashtags;
                         }
                     }
                 } catch (Exception e) {
-                    log.warn("Jackson JSON 파싱 실패, 정규식으로 추출 시도: {}", e.getMessage());
+                    log.warn("Jackson JSON 파싱 실패: {}", e.getMessage());
                 }
             }
             
+            // 2. 정규식을 사용한 JSON 파싱 (대안)
+            if (response.contains("\"hashtags\":")) {
+                // "hashtags": ["태그1", "태그2"] 패턴 찾기
+                String pattern = "\"hashtags\":\\s*\\[([^\\]]*)\\]";
+                java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern);
+                java.util.regex.Matcher matcher = regex.matcher(response);
+                
+                if (matcher.find()) {
+                    String hashtags = "[" + matcher.group(1) + "]";
+                    log.debug("정규식으로 추출된 해시태그: {}", hashtags);
+                    return hashtags;
+                }
+            }
+            
+            // 3. 간단한 문자열 파싱 (최후 수단)
+            if (response.contains("\"hashtags\":")) {
+                int start = response.indexOf("\"hashtags\":") + 12;
+                int end = response.indexOf("]", start);
+                if (end > start) {
+                    String hashtags = response.substring(start, end + 1);
+                    log.debug("문자열 파싱으로 추출된 해시태그: {}", hashtags);
+                    return hashtags;
+                }
+            }
+            
+            log.warn("해시태그를 추출할 수 없음. 응답: {}", response);
             return "[]";
         } catch (Exception e) {
             log.error("해시태그 추출 중 오류: {}", e.getMessage());
