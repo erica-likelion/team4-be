@@ -50,16 +50,16 @@ public class MadeService {
         return convertToResponseDto(savedMade);
     }
     
-    // 사진 업로드 및 블로그 생성 (POST)
+    // 사진 업로드 및 블로그 생성 (POST) - URL 방식으로 변경
     @Transactional
     public MadeResponseDto createMadeWithImages(Long storeId, String userInput, String hashTags, 
-                                             String detailedRequest, List<MultipartFile> images) {
+                                             String detailedRequest, List<String> imageUrls) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Store", storeId));
         
         try {
-            // 이미지 처리 (실제로는 파일 저장 로직 필요)
-            String imageUrls = processImages(images);
+            // 이미지 URL 처리
+            String imageUrlsString = processImageUrls(imageUrls);
             
             // 가게 정보를 자동으로 프롬프트에 포함
             String storeInfo = String.format("매장명: %s, 위치: %s, 영업시간: %s, 정보: %s, 메뉴: %s", 
@@ -77,8 +77,13 @@ public class MadeService {
                 enhancedUserInput += "\n\n상세 요청: " + detailedRequest;
             }
             
-            // AI 블로그 콘텐츠 생성
-            String aiResponse = blogGenerationService.generateBlogContent(enhancedUserInput, storeInfo);
+            // AI 블로그 콘텐츠 생성 (이미지 URL 포함)
+            String aiResponse;
+            if (imageUrls != null && !imageUrls.isEmpty()) {
+                aiResponse = blogGenerationService.generateBlogContentWithImages(enhancedUserInput, storeInfo, imageUrls);
+            } else {
+                aiResponse = blogGenerationService.generateBlogContent(enhancedUserInput, storeInfo);
+            }
             
             String generatedTitle = extractTitleFromResponse(aiResponse);
             String generatedContent = extractContentFromResponse(aiResponse);
@@ -92,7 +97,7 @@ public class MadeService {
                     .resultTitle(generatedTitle)
                     .resultContent(generatedContent)
                     .hashTag(extractedHashtags)
-                    .image(imageUrls)
+                    .image(imageUrlsString)
                     .build();
             
             Made savedMade = madeRepository.save(made);
@@ -159,6 +164,39 @@ public class MadeService {
                 .map(MultipartFile::getOriginalFilename)
                 .filter(name -> name != null && !name.isEmpty())
                 .collect(Collectors.joining(","));
+    }
+    
+    // 이미지 URL 처리 메서드
+    private String processImageUrls(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return "";
+        }
+        
+        // 유효한 URL 필터링 및 저장
+        return imageUrls.stream()
+                .filter(url -> url != null && !url.trim().isEmpty())
+                .filter(this::isValidImageUrl)
+                .collect(Collectors.joining(","));
+    }
+    
+    // 이미지 URL 유효성 검증
+    private boolean isValidImageUrl(String url) {
+        try {
+            // 기본적인 URL 형식 검증
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                return false;
+            }
+            
+            // 이미지 확장자 검증 (선택적)
+            String lowerUrl = url.toLowerCase();
+            return lowerUrl.contains(".jpg") || lowerUrl.contains(".jpeg") || 
+                   lowerUrl.contains(".png") || lowerUrl.contains(".gif") || 
+                   lowerUrl.contains(".webp") || lowerUrl.contains(".svg");
+                   
+        } catch (Exception e) {
+            log.warn("Invalid image URL: {}", url);
+            return false;
+        }
     }
     
     // 결과 조회 (GET)

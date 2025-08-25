@@ -38,7 +38,7 @@ public class MadeController {
             requestDto.getUserInput(), 
             requestDto.getHashTags(), 
             requestDto.getDetailedRequest(), 
-            null // 이미지는 현재 null로 처리
+            requestDto.getImageUrls() // 이미지 URL 리스트 전달
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

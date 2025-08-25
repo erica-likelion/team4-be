@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @Builder
@@ -28,6 +29,9 @@ public class MadeImageRequestDto {
     
     @Size(max = 500, message = "상세 요청은 500자 이하여야 합니다")
     private String detailedRequest;
+    
+    // 이미지 URL 리스트 추가
+    private List<String> imageUrls;
 }
 
 

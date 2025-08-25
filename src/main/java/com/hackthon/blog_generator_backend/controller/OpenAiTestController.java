@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -86,6 +87,57 @@ public class OpenAiTestController {
             
         } catch (Exception e) {
             log.error("OpenAI API 제목 생성 테스트 실패: {}", e.getMessage(), e);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            result.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.internalServerError().body(result);
+        }
+    }
+
+    @PostMapping("/generate-content-with-images")
+    public ResponseEntity<Map<String, Object>> testGenerateContentWithImages(
+            @RequestBody Map<String, Object> request) {
+        
+        String userInput = (String) request.get("userInput");
+        String storeInfo = (String) request.get("storeInfo");
+        @SuppressWarnings("unchecked")
+        List<String> imageUrls = (List<String>) request.get("imageUrls");
+        
+        if (userInput == null || userInput.trim().isEmpty()) {
+            userInput = "맛있는 커피와 디저트를 즐길 수 있는 카페";
+        }
+        
+        if (storeInfo == null || storeInfo.trim().isEmpty()) {
+            storeInfo = "서울 강남구에 위치한 분위기 좋은 카페";
+        }
+        
+        log.info("OpenAI API 이미지 포함 테스트 요청: userInput={}, storeInfo={}, imageUrls={}", 
+                userInput, storeInfo, imageUrls);
+        
+        try {
+            String response;
+            if (imageUrls != null && !imageUrls.isEmpty()) {
+                response = blogGenerationService.generateBlogContentWithImages(userInput, storeInfo, imageUrls);
+            } else {
+                response = blogGenerationService.generateBlogContent(userInput, storeInfo);
+            }
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("userInput", userInput);
+            result.put("storeInfo", storeInfo);
+            result.put("imageUrls", imageUrls);
+            result.put("generatedContent", response);
+            result.put("timestamp", System.currentTimeMillis());
+            
+            log.info("OpenAI API 이미지 포함 테스트 성공");
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            log.error("OpenAI API 이미지 포함 테스트 실패: {}", e.getMessage(), e);
             
             Map<String, Object> result = new HashMap<>();
             result.put("success", false);
