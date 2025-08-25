@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -83,14 +82,14 @@ public class StoreService {
         Store savedStore = storeRepository.save(store);
         System.out.println("Store 저장 완료 - ID: " + savedStore.getStoreId());
         
-        // 편의시설 정보를 고정값으로 설정하여 저장
-        System.out.println("편의시설 정보 고정값으로 저장 시작");
+        // 편의시설 정보를 사용자 입력으로 설정하여 저장
+        System.out.println("편의시설 정보 사용자 입력으로 저장 시작");
         
         Convenience convenience = Convenience.builder()
-                .wifi(true)           // 고정값: WiFi 제공
-                .outlet(true)         // 고정값: 콘센트 제공
-                .pet(false)           // 고정값: 반려동물 동반 불가
-                .packagingDelivery(true) // 고정값: 포장/배달 가능
+                .wifi(requestDto.getWifi() != null ? requestDto.getWifi() : false)           // 사용자 입력 또는 기본값 false
+                .outlet(requestDto.getOutlet() != null ? requestDto.getOutlet() : false)     // 사용자 입력 또는 기본값 false
+                .pet(requestDto.getPet() != null ? requestDto.getPet() : false)              // 사용자 입력 또는 기본값 false
+                .packagingDelivery(requestDto.getPackagingDelivery() != null ? requestDto.getPackagingDelivery() : false) // 사용자 입력 또는 기본값 false
                 .store(savedStore)
                 .build();
         

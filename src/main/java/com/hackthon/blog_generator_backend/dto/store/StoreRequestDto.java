@@ -41,5 +41,9 @@ public class StoreRequestDto {
     @Size(max = 50, message = "업종은 50자 이하여야 합니다")
     private String businessType;
     
-    // 편의시설 정보는 고정값으로 설정 (필드 제거)
+    // 편의시설 정보 (사용자 입력 받음)
+    private Boolean wifi;           // WiFi 제공 여부
+    private Boolean outlet;         // 콘센트 제공 여부
+    private Boolean pet;            // 반려동물 동반 가능 여부
+    private Boolean packagingDelivery; // 포장/배달 서비스 여부
 }
