@@ -96,17 +96,6 @@ public class StoreService {
         Convenience savedConvenience = convenienceRepository.save(convenience);
         System.out.println("편의시설 정보 저장 완료 - ID: " + savedConvenience.getId());
         
-        Convenience convenience = Convenience.builder()
-                .wifi(requestDto.getWifi() != null ? requestDto.getWifi() : false)
-                .outlet(requestDto.getOutlet() != null ? requestDto.getOutlet() : false)
-                .pet(requestDto.getPet() != null ? requestDto.getPet() : false)
-                .packagingDelivery(requestDto.getPackagingDelivery() != null ? requestDto.getPackagingDelivery() : false)
-                .store(savedStore)
-                .build();
-        
-        Convenience savedConvenience = convenienceRepository.save(convenience);
-        System.out.println("편의시설 정보 저장 완료 - ID: " + savedConvenience.getId());
-        
         // 편의시설 정보를 포함하여 Store 재조회
         return storeRepository.findByIdWithConvenience(savedStore.getStoreId())
                 .orElse(savedStore);
