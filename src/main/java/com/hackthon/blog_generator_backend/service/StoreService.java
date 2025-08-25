@@ -63,6 +63,9 @@ public class StoreService {
     // 가게 등록 (편의시설 정보 포함)
     @Transactional
     public Store createStore(StoreRequestDto requestDto) {
+        System.out.println("=== Store 생성 시작 ===");
+        System.out.println("요청 데이터: " + requestDto);
+        
         // Store 엔티티 생성
         Store store = Store.builder()
                 .storeName(requestDto.getStoreName())
@@ -77,10 +80,17 @@ public class StoreService {
         
         // Store 저장
         Store savedStore = storeRepository.save(store);
+        System.out.println("Store 저장 완료 - ID: " + savedStore.getStoreId());
         
         // Convenience 엔티티 생성 및 저장
         if (requestDto.getWifi() != null || requestDto.getOutlet() != null || 
             requestDto.getPet() != null || requestDto.getPackagingDelivery() != null) {
+            
+            System.out.println("편의시설 정보 저장 시작");
+            System.out.println("wifi: " + requestDto.getWifi());
+            System.out.println("outlet: " + requestDto.getOutlet());
+            System.out.println("pet: " + requestDto.getPet());
+            System.out.println("packagingDelivery: " + requestDto.getPackagingDelivery());
             
             Convenience convenience = Convenience.builder()
                     .wifi(requestDto.getWifi())
@@ -90,7 +100,10 @@ public class StoreService {
                     .store(savedStore)
                     .build();
             
-            convenienceRepository.save(convenience);
+            Convenience savedConvenience = convenienceRepository.save(convenience);
+            System.out.println("편의시설 정보 저장 완료 - ID: " + savedConvenience.getId());
+        } else {
+            System.out.println("편의시설 정보가 null이므로 저장하지 않음");
         }
         
         return savedStore;
