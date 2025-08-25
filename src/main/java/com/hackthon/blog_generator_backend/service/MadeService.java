@@ -62,8 +62,10 @@ public class MadeService {
             String imageUrlsString = processImageUrls(imageUrls);
             
             // 가게 정보를 자동으로 프롬프트에 포함
-            String storeInfo = String.format("매장명: %s, 위치: %s, 영업시간: %s, 정보: %s, 메뉴: %s", 
-                store.getStoreName(), store.getLocation(), store.getStoreTime(), 
+            String storeInfo = String.format("매장명: %s, 위치: %s, 영업시간: %s-%s, 정보: %s, 메뉴: %s", 
+                store.getStoreName(), store.getLocation(), 
+                store.getOpenTime() != null ? store.getOpenTime() : "미정", 
+                store.getCloseTime() != null ? store.getCloseTime() : "미정",
                 store.getInformation(), store.getMenu());
             
             // 해시태그를 프롬프트에 포함
