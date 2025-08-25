@@ -1,7 +1,10 @@
 package com.hackthon.blog_generator_backend.service;
 
 import com.hackthon.blog_generator_backend.entity.Store;
+import com.hackthon.blog_generator_backend.entity.Convenience;
+import com.hackthon.blog_generator_backend.dto.store.StoreRequestDto;
 import com.hackthon.blog_generator_backend.repository.StoreRepository;
+import com.hackthon.blog_generator_backend.repository.ConvenienceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,7 @@ import java.util.Optional;
 public class StoreService {
     
     private final StoreRepository storeRepository;
+    private final ConvenienceRepository convenienceRepository;
     
     // 모든 매장 조회 (Dashboard용)
     public List<Store> getAllStores() {
@@ -47,10 +51,40 @@ public class StoreService {
         return storeRepository.findByInformationContaining(information);
     }
     
-    // 가게 등록
+    // 가게 등록 (편의시설 정보 포함)
     @Transactional
-    public Store createStore(Store store) {
-        return storeRepository.save(store);
+    public Store createStore(StoreRequestDto requestDto) {
+        // Store 엔티티 생성
+        Store store = Store.builder()
+                .storeName(requestDto.getStoreName())
+                .storeImage(requestDto.getStoreImage())
+                .information(requestDto.getInformation())
+                .location(requestDto.getLocation())
+                .storeTime(requestDto.getStoreTime())
+                .closedDays(requestDto.getClosedDays())
+                .reservation(requestDto.getReservation())
+                .menu(requestDto.getMenu())
+                .build();
+        
+        // Store 저장
+        Store savedStore = storeRepository.save(store);
+        
+        // Convenience 엔티티 생성 및 저장
+        if (requestDto.getWifi() != null || requestDto.getOutlet() != null || 
+            requestDto.getPet() != null || requestDto.getPackagingDelivery() != null) {
+            
+            Convenience convenience = Convenience.builder()
+                    .wifi(requestDto.getWifi())
+                    .outlet(requestDto.getOutlet())
+                    .pet(requestDto.getPet())
+                    .packagingDelivery(requestDto.getPackagingDelivery())
+                    .store(savedStore)
+                    .build();
+            
+            convenienceRepository.save(convenience);
+        }
+        
+        return savedStore;
     }
     
     // 가게 정보 수정
