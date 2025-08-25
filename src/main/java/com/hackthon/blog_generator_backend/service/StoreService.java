@@ -76,6 +76,7 @@ public class StoreService {
                 .closedDays(requestDto.getClosedDays())
                 .reservation(requestDto.getReservation())
                 .menu(requestDto.getMenu())
+                .businessType(requestDto.getBusinessType())
                 .build();
         
         // Store 저장

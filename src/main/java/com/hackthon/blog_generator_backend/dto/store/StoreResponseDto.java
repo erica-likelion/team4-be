@@ -25,6 +25,7 @@ public class StoreResponseDto {
     private Boolean reservation;
     private String menu;
     private Integer count;
+    private String businessType;
     
     // 편의시설 정보 포함
     private ConvenienceDto convenience;
@@ -60,6 +61,7 @@ public class StoreResponseDto {
                 .reservation(store.getReservation())
                 .menu(store.getMenu())
                 .count(store.getCount())
+                .businessType(store.getBusinessType())
                 .convenience(convenienceDto)
                 .build();
     }
