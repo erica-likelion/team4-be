@@ -47,6 +47,9 @@ public class Store {
     @Column(name = "count")
     private Integer count;
 
+    @Column(name = "business_type")
+    private String businessType;
+
     // 관계 매핑 - 무한 순환 참조 방지
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference

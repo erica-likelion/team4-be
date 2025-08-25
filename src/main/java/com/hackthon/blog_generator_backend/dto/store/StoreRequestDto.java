@@ -38,5 +38,8 @@ public class StoreRequestDto {
     @Size(max = 2000, message = "메뉴 정보는 2000자 이하여야 합니다")
     private String menu;
     
+    @Size(max = 50, message = "업종은 50자 이하여야 합니다")
+    private String businessType;
+    
     // 편의시설 정보는 고정값으로 설정 (필드 제거)
 }
