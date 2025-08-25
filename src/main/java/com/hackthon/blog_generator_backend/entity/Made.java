@@ -19,7 +19,7 @@ public class Made {
     @Column(name = "made_id")
     private Long madeId;
 
-    @Column(name = "image")
+    @Column(name = "image", columnDefinition = "TEXT")
     private String image;
 
     @Column(name = "hash_tag")
