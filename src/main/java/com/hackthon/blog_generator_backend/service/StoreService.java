@@ -60,7 +60,7 @@ public class StoreService {
         return storeRepository.findByInformationContaining(information);
     }
     
-    // 가게 등록 (편의시설 정보 포함)
+    // 가게 등록 (편의시설 정보 고정값으로 설정)
     @Transactional
     public Store createStore(StoreRequestDto requestDto) {
         System.out.println("=== Store 생성 시작 ===");
@@ -82,12 +82,19 @@ public class StoreService {
         Store savedStore = storeRepository.save(store);
         System.out.println("Store 저장 완료 - ID: " + savedStore.getStoreId());
         
-        // Convenience 엔티티 생성 및 저장 (null 값은 false로 기본 처리)
-        System.out.println("편의시설 정보 저장 시작");
-        System.out.println("wifi: " + requestDto.getWifi() + " -> " + (requestDto.getWifi() != null ? requestDto.getWifi() : false));
-        System.out.println("outlet: " + requestDto.getOutlet() + " -> " + (requestDto.getOutlet() != null ? requestDto.getOutlet() : false));
-        System.out.println("pet: " + requestDto.getPet() + " -> " + (requestDto.getPet() != null ? requestDto.getPet() : false));
-        System.out.println("packagingDelivery: " + requestDto.getPackagingDelivery() + " -> " + (requestDto.getPackagingDelivery() != null ? requestDto.getPackagingDelivery() : false));
+        // 편의시설 정보를 고정값으로 설정하여 저장
+        System.out.println("편의시설 정보 고정값으로 저장 시작");
+        
+        Convenience convenience = Convenience.builder()
+                .wifi(true)           // 고정값: WiFi 제공
+                .outlet(true)         // 고정값: 콘센트 제공
+                .pet(false)           // 고정값: 반려동물 동반 불가
+                .packagingDelivery(true) // 고정값: 포장/배달 가능
+                .store(savedStore)
+                .build();
+        
+        Convenience savedConvenience = convenienceRepository.save(convenience);
+        System.out.println("편의시설 정보 저장 완료 - ID: " + savedConvenience.getId());
         
         Convenience convenience = Convenience.builder()
                 .wifi(requestDto.getWifi() != null ? requestDto.getWifi() : false)

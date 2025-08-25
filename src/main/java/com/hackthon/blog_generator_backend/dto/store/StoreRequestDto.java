@@ -38,9 +38,5 @@ public class StoreRequestDto {
     @Size(max = 2000, message = "메뉴 정보는 2000자 이하여야 합니다")
     private String menu;
     
-    // 편의시설 정보 (UI 폼에서 함께 입력)
-    private Boolean wifi;
-    private Boolean outlet;
-    private Boolean pet;
-    private Boolean packagingDelivery;
+    // 편의시설 정보는 고정값으로 설정 (필드 제거)
 }
