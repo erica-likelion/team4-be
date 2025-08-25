@@ -42,6 +42,11 @@ public class StoreResponseDto {
                     .pet(convenience.getPet())
                     .packagingDelivery(convenience.getPackagingDelivery())
                     .build();
+            
+            System.out.println("편의시설 정보 변환 완료: " + convenienceDto);
+        } else {
+            System.out.println("편의시설 정보 없음 - Store ID: " + store.getStoreId() + 
+                             ", ConvenienceList: " + store.getConvenienceList());
         }
         
         return StoreResponseDto.builder()

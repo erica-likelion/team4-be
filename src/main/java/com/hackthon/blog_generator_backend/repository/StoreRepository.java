@@ -26,4 +26,12 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     
     // 매장명으로 정확히 조회
     Optional<Store> findByStoreName(String storeName);
+    
+    // 편의시설 정보와 함께 모든 매장 조회 (JOIN FETCH)
+    @Query("SELECT DISTINCT s FROM Store s LEFT JOIN FETCH s.convenienceList")
+    List<Store> findAllWithConvenience();
+    
+    // 편의시설 정보와 함께 특정 매장 조회 (JOIN FETCH)
+    @Query("SELECT DISTINCT s FROM Store s LEFT JOIN FETCH s.convenienceList WHERE s.storeId = :storeId")
+    Optional<Store> findByIdWithConvenience(Long storeId);
 }

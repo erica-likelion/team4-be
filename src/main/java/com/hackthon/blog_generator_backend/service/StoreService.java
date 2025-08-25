@@ -20,14 +20,23 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final ConvenienceRepository convenienceRepository;
     
-    // 모든 매장 조회 (Dashboard용)
+    // 모든 매장 조회 (Dashboard용) - 편의시설 정보 포함
     public List<Store> getAllStores() {
-        return storeRepository.findAll();
+        List<Store> stores = storeRepository.findAllWithConvenience();
+        
+        // 편의시설 정보 조회 상태 로깅
+        for (Store store : stores) {
+            System.out.println("Store ID: " + store.getStoreId() + 
+                             ", ConvenienceList size: " + 
+                             (store.getConvenienceList() != null ? store.getConvenienceList().size() : "null"));
+        }
+        
+        return stores;
     }
     
-    // 매장 ID로 조회
+    // 매장 ID로 조회 - 편의시설 정보 포함
     public Store getStoreById(Long storeId) {
-        return storeRepository.findById(storeId)
+        return storeRepository.findByIdWithConvenience(storeId)
                 .orElseThrow(() -> new RuntimeException("Store not found"));
     }
     
