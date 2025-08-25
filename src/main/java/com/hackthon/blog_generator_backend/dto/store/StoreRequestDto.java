@@ -26,9 +26,13 @@ public class StoreRequestDto {
     @Size(max = 200, message = "위치는 200자 이하여야 합니다")
     private String location;
     
-    @Min(value = 0, message = "영업시간은 0 이상이어야 합니다")
-    @Max(value = 24, message = "영업시간은 24 이하여야 합니다")
-    private Integer storeTime;
+    @Min(value = 0, message = "오픈시간은 0 이상이어야 합니다")
+    @Max(value = 23, message = "오픈시간은 23 이하여야 합니다")
+    private Integer openTime;
+    
+    @Min(value = 0, message = "마감시간은 0 이상이어야 합니다")
+    @Max(value = 23, message = "마감시간은 23 이하여야 합니다")
+    private Integer closeTime;
     
     @Size(max = 100, message = "휴무일 정보는 100자 이하여야 합니다")
     private String closedDays;

@@ -32,8 +32,11 @@ public class Store {
     @Column(name = "location")
     private String location;
 
-    @Column(name = "store_time")
-    private Integer storeTime;
+    @Column(name = "open_time")
+    private Integer openTime;
+
+    @Column(name = "close_time")
+    private Integer closeTime;
 
     @Column(name = "closed_days")
     private String closedDays;

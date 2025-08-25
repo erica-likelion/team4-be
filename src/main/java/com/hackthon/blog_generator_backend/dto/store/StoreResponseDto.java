@@ -18,7 +18,8 @@ public class StoreResponseDto {
     private String storeImage;
     private String information;
     private String location;
-    private Integer storeTime;
+    private Integer openTime;
+    private Integer closeTime;
     private String closedDays;
     private Boolean reservation;
     private String menu;
@@ -58,7 +59,8 @@ public class StoreResponseDto {
                 .storeImage(store.getStoreImage())
                 .information(store.getInformation())
                 .location(store.getLocation())
-                .storeTime(store.getStoreTime())
+                .openTime(store.getOpenTime())
+                .closeTime(store.getCloseTime())
                 .closedDays(store.getClosedDays())
                 .reservation(store.getReservation())
                 .menu(store.getMenu())
