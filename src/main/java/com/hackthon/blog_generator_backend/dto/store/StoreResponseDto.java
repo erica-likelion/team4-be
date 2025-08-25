@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,27 +25,31 @@ public class StoreResponseDto {
     private Integer count;
     private String businessType;
     
-    // 편의시설 정보 포함
-    private ConvenienceDto convenience;
+    // 편의시설 정보 개별 필드로 노출
+    private Boolean wifi;
+    private Boolean outlet;  
+    private Boolean pet;
+    private Boolean packagingDelivery;
     
     // 편의시설 정보 변환 메서드
     public static StoreResponseDto fromEntity(Store store) {
-        ConvenienceDto convenienceDto = null;
+        // 편의시설 정보 기본값 설정
+        Boolean wifi = false;
+        Boolean outlet = false;
+        Boolean pet = false;
+        Boolean packagingDelivery = false;
         
-        // 편의시설 정보가 있으면 변환
+        // 편의시설 정보가 있으면 개별 필드로 설정
         if (store.getConvenienceList() != null && !store.getConvenienceList().isEmpty()) {
             Convenience convenience = store.getConvenienceList().get(0); // 첫 번째 편의시설 정보 사용
-            convenienceDto = ConvenienceDto.builder()
-                    .wifi(convenience.getWifi())
-                    .outlet(convenience.getOutlet())
-                    .pet(convenience.getPet())
-                    .packagingDelivery(convenience.getPackagingDelivery())
-                    .build();
+            wifi = convenience.getWifi() != null ? convenience.getWifi() : false;
+            outlet = convenience.getOutlet() != null ? convenience.getOutlet() : false;
+            pet = convenience.getPet() != null ? convenience.getPet() : false;
+            packagingDelivery = convenience.getPackagingDelivery() != null ? convenience.getPackagingDelivery() : false;
             
-            System.out.println("편의시설 정보 변환 완료: " + convenienceDto);
+            System.out.println("편의시설 정보 변환 완료 - wifi: " + wifi + ", outlet: " + outlet + ", pet: " + pet + ", packagingDelivery: " + packagingDelivery);
         } else {
-            System.out.println("편의시설 정보 없음 - Store ID: " + store.getStoreId() + 
-                             ", ConvenienceList: " + store.getConvenienceList());
+            System.out.println("편의시설 정보 없음 - Store ID: " + store.getStoreId() + ", 기본값 false로 설정");
         }
         
         return StoreResponseDto.builder()
@@ -60,9 +62,12 @@ public class StoreResponseDto {
                 .closedDays(store.getClosedDays())
                 .reservation(store.getReservation())
                 .menu(store.getMenu())
-                .count(store.getCount())
+                .count(store.getCount() != null ? store.getCount() : 0)  // count null이면 기본값 0
                 .businessType(store.getBusinessType())
-                .convenience(convenienceDto)
+                .wifi(wifi)
+                .outlet(outlet)
+                .pet(pet)
+                .packagingDelivery(packagingDelivery)
                 .build();
     }
 }
